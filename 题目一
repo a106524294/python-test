@@ -1,0 +1,30 @@
+import csv
+
+import requests
+from lxml import etree
+import json
+
+url = 'https://voice.baidu.com/act/newpneumonia/newpneumonia/?from=osari_aladin_banner#tab4'
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36"
+}
+response = requests.get(url=url,headers=headers).text
+html = etree.HTML(response)
+json_text = html.xpath('//script[@type="application/json"]/text()')
+json_text = json_text[0]
+
+result = json.loads(json_text)
+result = result["component"]
+result = result[0]['caseList']
+
+
+for case in result:
+    area = case['area']                                 # 城市
+    curConfirm = case['curConfirm']                     # 当前确诊
+    curConfirmRelative = case['curConfirmRelative']     # 新增人数
+    confirmed = case['confirmed']                       # 累计确诊
+    crued = case['crued']                               # 治愈人数
+    died = case['died']                                 # 死亡人数
+    with open('data.csv', mode='a', encoding='utf-8', newline='') as f:
+        csv_writer = csv.writer(f)
+        csv_writer.writerow([area, curConfirmRelative, curConfirm, confirmed, crued, died])
